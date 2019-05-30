@@ -17,6 +17,13 @@ def convert_dicts(fields, items):
     return ret_items
 
 
+def convert_dicts2(fields, items):
+    for i in items:
+        yield dict(zip(fields, i))
+
+
+
+
 def add_quotes(value):
     if isinstance(value, str):
         value = '"{}"'.format(value.replace('"', "'"))

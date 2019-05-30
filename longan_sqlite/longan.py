@@ -100,7 +100,8 @@ class Longan:
         ret = Longan.db_handler.execute(sql)
         self.clear()
         field_arr = [field[0] for field in Longan.db_handler.desc()]
-        return convert_dicts(field_arr, ret)
+        # return convert_dicts(field_arr, ret)
+        return convert_dicts2(field_arr, ret)
 
     def insert(self, *field_obj):
         """
