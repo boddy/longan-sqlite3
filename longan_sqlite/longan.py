@@ -102,7 +102,7 @@ class Longan:
         field_arr = [field[0] for field in Longan.db_handler.desc()]
         return convert_dicts(field_arr, ret)
 
-    def insert_or_update(self, *field_obj):
+    def insert(self, *field_obj):
         """
         插入或更新
         :param field_obj: Filed
@@ -110,18 +110,40 @@ class Longan:
         """
         insert_sql_0 = SqlConfig.INSERT
         for obj in field_obj:
-            insert_sql = insert_sql_0.format(self._table_name, obj.keys_str(), obj.values_str())
-            Longan.db_handler.execute(insert_sql)
-            key = self.primary_key()
-            if Longan.db_handler.affect() <= 0:
-                update_sql = SqlConfig.UPDATE
-                value = obj.join('=')
-                where = "{}={}".format(key, add_quotes(obj.get(key)))
-                update_sql = update_sql.format(self._table_name, value, where)
-                Longan.db_handler.execute(update_sql)
-            else:
-                obj.set(key, Longan.db_handler.last_id(), force=False)
+
+            true_values = tuple(obj.values())
+            values_len = len(true_values)
+            holder = ('?,' * values_len).rstrip(',')
+
+            insert_sql = insert_sql_0.format(self._table_name, obj.keys_str(), holder)
+
+            Longan.db_handler.execute(insert_sql, true_values)
+
         Longan.db_handler.commit()
+
+
+
+    #独立update
+    def update(self, _dict=None, **kwargs):
+
+        sql = SqlConfig.UPDATE
+
+        if not self._condition:
+            return 0
+
+        if not _dict:
+            _dict = kwargs
+
+        set_value = Flesh(_dict).join('=')
+
+        sql = sql.format(self._table_name, set_value, self._condition)
+
+        Longan.db_handler.execute(sql)
+        self.clear()
+        Longan.db_handler.commit()
+        return Longan.db_handler.affect()
+
+
 
     def delete(self, field_obj=None):
         """

@@ -8,11 +8,15 @@ class DBHandler:
         self._connect = sqlite3.connect(db_path)
         self._cursor = self._connect.cursor()
 
-    def execute(self, sql):
+    def execute(self, sql, pre=None):
         if self._debug:
             print("[Longan Debug]", end='\t')
             print(sql)
-        self._cursor.execute(sql)
+        if pre:
+            self._cursor.execute(sql, pre)
+        else:
+            self._cursor.execute(sql)
+
         return self._cursor.fetchall()
 
     def commit(self):
